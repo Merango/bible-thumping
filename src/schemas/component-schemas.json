@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "PersonalityProfile": {
+      "type": "object",
+      "required": ["id", "name", "samplePrompts", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Unique identifier for the personality profile"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the personality"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the personality"
+        },
+        "tone": {
+          "type": "string",
+          "description": "Characteristic tone of the personality"
+        },
+        "samplePrompts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "description": "Sample conversation prompts"
+        },
+        "version": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Version of the personality profile"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChatbotResponse": {
+      "type": "object",
+      "required": ["agentId", "content", "confidence", "timestamp"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "timestamp": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ConversationSession": {
+      "type": "object",
+      "required": ["sessionId", "participants", "startTime", "messages"],
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1
+        },
+        "startTime": {
+          "type": "number"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChatbotResponse"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
