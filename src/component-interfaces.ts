@@ -1,9 +1,17 @@
 /**
- * Defines core interfaces for multi-agent chat platform components
+ * Comprehensive interfaces for multi-agent chat platform components
  * @module ComponentInterfaces
  */
 
-// Personality Profile Interface
+// Enhanced Validation Utilities
+export class ValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ValidationError';
+  }
+}
+
+// Personality Profile Interface with Enhanced Validation
 export interface PersonalityProfile {
   id: string;
   name: string;
@@ -11,6 +19,27 @@ export interface PersonalityProfile {
   tone: string;
   samplePrompts: string[];
   version: number;
+}
+
+// Advanced Validation Function
+export function validatePersonalityProfile(profile: PersonalityProfile): boolean {
+  if (!profile.id || profile.id.trim() === '') {
+    throw new ValidationError('Profile ID is required');
+  }
+
+  if (!profile.name || profile.name.trim() === '') {
+    throw new ValidationError('Profile name is required');
+  }
+
+  if (profile.samplePrompts.length === 0) {
+    throw new ValidationError('At least one sample prompt is required');
+  }
+
+  if (profile.version < 1) {
+    throw new ValidationError('Version must be a positive number');
+  }
+
+  return true;
 }
 
 // Chatbot Response Interface
@@ -48,21 +77,29 @@ export interface ServiceError {
   details?: Record<string, unknown>;
 }
 
-// Validation Utility
-export function validatePersonalityProfile(profile: PersonalityProfile): boolean {
-  if (!profile.id || !profile.name) {
-    return false;
-  }
-  
-  if (profile.samplePrompts.length === 0) {
-    return false;
-  }
-
-  return true;
-}
-
 // Abstract Base Classes for Consistent Component Design
 export abstract class BaseComponent {
   abstract initialize(): Promise<void>;
   abstract validate(): boolean;
+}
+
+// Factory for creating validated components
+export function createPersonalityProfile(data: Partial<PersonalityProfile>): PersonalityProfile {
+  const defaultProfile: PersonalityProfile = {
+    id: '',
+    name: '',
+    description: '',
+    tone: '',
+    samplePrompts: [],
+    version: 1
+  };
+
+  const profile: PersonalityProfile = { ...defaultProfile, ...data };
+  
+  try {
+    validatePersonalityProfile(profile);
+    return profile;
+  } catch (error) {
+    throw error;
+  }
 }
