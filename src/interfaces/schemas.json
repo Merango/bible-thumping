@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "PersonalityProfile": {
+      "type": "object",
+      "required": ["id", "name", "tone", "samplePrompts", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the personality profile"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the personality"
+        },
+        "tone": {
+          "type": "string",
+          "description": "Characterization of the personality's communication style"
+        },
+        "samplePrompts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Example prompts for the personality"
+        },
+        "version": {
+          "type": "string",
+          "description": "Version identifier of the profile"
+        }
+      }
+    },
+    "ChatContext": {
+      "type": "object",
+      "required": ["conversationHistory"],
+      "properties": {
+        "conversationHistory": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Chronological conversation messages"
+        },
+        "maxTokens": {
+          "type": "number",
+          "description": "Maximum token limit for response generation"
+        }
+      }
+    },
+    "AgentReply": {
+      "type": "object",
+      "required": ["agentId", "message", "timestamp"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "description": "Unique identifier of the responding agent"
+        },
+        "message": {
+          "type": "string",
+          "description": "Generated response message"
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Unix timestamp of the reply"
+        }
+      }
+    }
+  }
+}
