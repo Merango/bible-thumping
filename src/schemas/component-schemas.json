@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "PersonalityProfile": {
+      "type": "object",
+      "required": ["id", "name", "description", "tone", "samplePrompts", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the personality profile",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the personality",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the personality",
+          "minLength": 10,
+          "maxLength": 500
+        },
+        "tone": {
+          "type": "string",
+          "description": "Communication tone of the personality",
+          "enum": ["compassionate", "authoritative", "analytical", "empathetic", "neutral"]
+        },
+        "samplePrompts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "version": {
+          "type": "number",
+          "minimum": 1,
+          "description": "Version of the personality profile"
+        }
+      }
+    },
+    "ChatbotResponse": {
+      "type": "object",
+      "required": ["agentId", "message", "confidence", "timestamp"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "description": "Unique identifier of the agent",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "message": {
+          "type": "string",
+          "description": "Response message from the agent",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence level of the response"
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Timestamp of the response generation"
+        }
+      }
+    }
+  }
+}
