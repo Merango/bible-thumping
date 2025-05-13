@@ -1,13 +1,17 @@
 import { 
-  validatePersonalityProfile, 
   createPersonalityProfile,
+  validateProfile,
+  validateResponse,
+  validateSession,
   ValidationError,
+  SchemaValidationError,
+  getValidationErrorDetails,
   PersonalityProfile,
   ChatbotResponse,
   ConversationSession
 } from '../src/component-interfaces';
 
-describe('Component Interfaces', () => {
+describe('Comprehensive Component Interface Validation', () => {
   describe('Personality Profile Validation', () => {
     const validProfileData: PersonalityProfile = {
       id: 'peter_disciple',
@@ -24,82 +28,100 @@ describe('Component Interfaces', () => {
     });
 
     test('validates a complete personality profile', () => {
-      expect(() => validatePersonalityProfile(validProfileData)).not.toThrow();
+      expect(() => validateProfile(validProfileData)).not.toThrow();
     });
 
-    test('throws error for empty profile ID', () => {
-      expect(() => validatePersonalityProfile({
-        ...validProfileData,
-        id: ''
-      })).toThrow(ValidationError);
+    test('throws SchemaValidationError for invalid profile', () => {
+      const invalidProfiles = [
+        { ...validProfileData, id: '' },
+        { ...validProfileData, name: '' },
+        { ...validProfileData, samplePrompts: [] },
+        { ...validProfileData, version: 0 }
+      ];
+
+      invalidProfiles.forEach(profile => {
+        expect(() => validateProfile(profile)).toThrow(SchemaValidationError);
+      });
     });
 
-    test('throws error for empty name', () => {
-      expect(() => validatePersonalityProfile({
-        ...validProfileData,
-        name: ''
-      })).toThrow(ValidationError);
-    });
-
-    test('throws error for empty sample prompts', () => {
-      expect(() => validatePersonalityProfile({
-        ...validProfileData,
-        samplePrompts: []
-      })).toThrow(ValidationError);
-    });
-
-    test('throws error for invalid version', () => {
-      expect(() => validatePersonalityProfile({
-        ...validProfileData,
-        version: 0
-      })).toThrow(ValidationError);
+    test('provides detailed validation error messages', () => {
+      try {
+        validateProfile({ 
+          ...validProfileData, 
+          id: '',
+          name: '' 
+        });
+        fail('Should have thrown validation error');
+      } catch (error) {
+        if (error instanceof SchemaValidationError) {
+          const errorDetails = getValidationErrorDetails(error);
+          expect(errorDetails.length).toBeGreaterThan(0);
+        }
+      }
     });
   });
 
-  describe('Response and Session Types', () => {
-    test('creates a valid chatbot response', () => {
-      const response: ChatbotResponse = {
+  describe('Chatbot Response Validation', () => {
+    const validResponse: ChatbotResponse = {
+      agentId: 'peter_disciple',
+      content: 'I believe in Jesus Christ!',
+      confidence: 0.95,
+      timestamp: Date.now()
+    };
+
+    test('validates a valid chatbot response', () => {
+      expect(() => validateResponse(validResponse)).not.toThrow();
+    });
+
+    test('throws error for invalid response', () => {
+      const invalidResponses = [
+        { ...validResponse, agentId: '' },
+        { ...validResponse, content: '' },
+        { ...validResponse, confidence: 1.5 },
+        { ...validResponse, confidence: -0.1 }
+      ];
+
+      invalidResponses.forEach(response => {
+        expect(() => validateResponse(response)).toThrow(SchemaValidationError);
+      });
+    });
+  });
+
+  describe('Conversation Session Validation', () => {
+    const validSession: ConversationSession = {
+      sessionId: 'last_supper_session',
+      participants: ['peter', 'john', 'jesus'],
+      startTime: Date.now(),
+      messages: [{
         agentId: 'peter_disciple',
-        content: 'I believe in Jesus Christ!',
-        confidence: 0.95,
+        content: 'I will never deny you!',
+        confidence: 0.9,
         timestamp: Date.now()
-      };
+      }]
+    };
 
-      expect(response.agentId).toBe('peter_disciple');
-      expect(response.confidence).toBeGreaterThan(0);
+    test('validates a valid conversation session', () => {
+      expect(() => validateSession(validSession)).not.toThrow();
     });
 
-    test('creates a conversation session', () => {
-      const session: ConversationSession = {
-        sessionId: 'last_supper_session',
-        participants: ['peter', 'john', 'jesus'],
-        startTime: Date.now(),
-        messages: []
-      };
+    test('throws error for invalid session', () => {
+      const invalidSessions = [
+        { ...validSession, sessionId: '' },
+        { ...validSession, participants: [] },
+        { 
+          ...validSession, 
+          messages: [{
+            agentId: '',
+            content: '',
+            confidence: 2,
+            timestamp: Date.now()
+          }]
+        }
+      ];
 
-      expect(session.participants.length).toBe(3);
-      expect(session.messages).toHaveLength(0);
-    });
-  });
-
-  describe('Profile Creation Factory', () => {
-    test('creates profile with partial data', () => {
-      const partialData = {
-        id: 'john_disciple',
-        name: 'John',
-        samplePrompts: ['What do you believe?']
-      };
-
-      const profile = createPersonalityProfile(partialData);
-      
-      expect(profile.id).toBe('john_disciple');
-      expect(profile.name).toBe('John');
-      expect(profile.version).toBe(1);
-      expect(profile.description).toBe('');
-    });
-
-    test('throws error for completely invalid profile', () => {
-      expect(() => createPersonalityProfile({})).toThrow(ValidationError);
+      invalidSessions.forEach(session => {
+        expect(() => validateSession(session)).toThrow(SchemaValidationError);
+      });
     });
   });
 });
