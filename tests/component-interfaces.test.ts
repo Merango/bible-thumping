@@ -1,5 +1,7 @@
 import { 
   validatePersonalityProfile, 
+  createPersonalityProfile,
+  ValidationError,
   PersonalityProfile,
   ChatbotResponse,
   ConversationSession
@@ -7,7 +9,7 @@ import {
 
 describe('Component Interfaces', () => {
   describe('Personality Profile Validation', () => {
-    const validProfile: PersonalityProfile = {
+    const validProfileData: PersonalityProfile = {
       id: 'peter_disciple',
       name: 'Peter',
       description: 'Passionate follower of Jesus',
@@ -16,21 +18,41 @@ describe('Component Interfaces', () => {
       version: 1
     };
 
-    const invalidProfile: PersonalityProfile = {
-      id: '',
-      name: '',
-      description: '',
-      tone: '',
-      samplePrompts: [],
-      version: 0
-    };
-
-    test('validates a complete personality profile', () => {
-      expect(validatePersonalityProfile(validProfile)).toBe(true);
+    test('creates a valid personality profile', () => {
+      const profile = createPersonalityProfile(validProfileData);
+      expect(profile).toEqual(validProfileData);
     });
 
-    test('rejects an incomplete personality profile', () => {
-      expect(validatePersonalityProfile(invalidProfile)).toBe(false);
+    test('validates a complete personality profile', () => {
+      expect(() => validatePersonalityProfile(validProfileData)).not.toThrow();
+    });
+
+    test('throws error for empty profile ID', () => {
+      expect(() => validatePersonalityProfile({
+        ...validProfileData,
+        id: ''
+      })).toThrow(ValidationError);
+    });
+
+    test('throws error for empty name', () => {
+      expect(() => validatePersonalityProfile({
+        ...validProfileData,
+        name: ''
+      })).toThrow(ValidationError);
+    });
+
+    test('throws error for empty sample prompts', () => {
+      expect(() => validatePersonalityProfile({
+        ...validProfileData,
+        samplePrompts: []
+      })).toThrow(ValidationError);
+    });
+
+    test('throws error for invalid version', () => {
+      expect(() => validatePersonalityProfile({
+        ...validProfileData,
+        version: 0
+      })).toThrow(ValidationError);
     });
   });
 
@@ -57,6 +79,27 @@ describe('Component Interfaces', () => {
 
       expect(session.participants.length).toBe(3);
       expect(session.messages).toHaveLength(0);
+    });
+  });
+
+  describe('Profile Creation Factory', () => {
+    test('creates profile with partial data', () => {
+      const partialData = {
+        id: 'john_disciple',
+        name: 'John',
+        samplePrompts: ['What do you believe?']
+      };
+
+      const profile = createPersonalityProfile(partialData);
+      
+      expect(profile.id).toBe('john_disciple');
+      expect(profile.name).toBe('John');
+      expect(profile.version).toBe(1);
+      expect(profile.description).toBe('');
+    });
+
+    test('throws error for completely invalid profile', () => {
+      expect(() => createPersonalityProfile({})).toThrow(ValidationError);
     });
   });
 });
