@@ -1,17 +1,44 @@
+import Ajv from 'ajv';
+import componentSchemas from './schemas/component-schemas.json';
+
 /**
- * Comprehensive interfaces for multi-agent chat platform components
+ * Comprehensive interfaces and validation for multi-agent chat platform components
  * @module ComponentInterfaces
  */
 
-// Enhanced Validation Utilities
+// Advanced Error Classes
 export class ValidationError extends Error {
-  constructor(message: string) {
+  public details: unknown[];
+
+  constructor(message: string, details: unknown[] = []) {
     super(message);
     this.name = 'ValidationError';
+    this.details = details;
   }
 }
 
-// Personality Profile Interface with Enhanced Validation
+export class SchemaValidationError extends ValidationError {
+  constructor(details: unknown[]) {
+    super('Schema validation failed', details);
+    this.name = 'SchemaValidationError';
+  }
+}
+
+// JSON Schema Validator
+const ajv = new Ajv({ allErrors: true });
+
+// Compile schemas
+const validatePersonalityProfile = ajv.compile(
+  componentSchemas.definitions.PersonalityProfile
+);
+const validateChatbotResponse = ajv.compile(
+  componentSchemas.definitions.ChatbotResponse
+);
+const validateConversationSession = ajv.compile(
+  componentSchemas.definitions.ConversationSession
+);
+
+// Interfaces
 export interface PersonalityProfile {
   id: string;
   name: string;
@@ -21,28 +48,6 @@ export interface PersonalityProfile {
   version: number;
 }
 
-// Advanced Validation Function
-export function validatePersonalityProfile(profile: PersonalityProfile): boolean {
-  if (!profile.id || profile.id.trim() === '') {
-    throw new ValidationError('Profile ID is required');
-  }
-
-  if (!profile.name || profile.name.trim() === '') {
-    throw new ValidationError('Profile name is required');
-  }
-
-  if (profile.samplePrompts.length === 0) {
-    throw new ValidationError('At least one sample prompt is required');
-  }
-
-  if (profile.version < 1) {
-    throw new ValidationError('Version must be a positive number');
-  }
-
-  return true;
-}
-
-// Chatbot Response Interface
 export interface ChatbotResponse {
   agentId: string;
   content: string;
@@ -50,7 +55,6 @@ export interface ChatbotResponse {
   timestamp: number;
 }
 
-// Conversation Session Interface
 export interface ConversationSession {
   sessionId: string;
   participants: string[];
@@ -58,33 +62,47 @@ export interface ConversationSession {
   messages: ChatbotResponse[];
 }
 
-// API Request/Response Interfaces
-export interface ChatRequest {
-  sessionId?: string;
-  userMessage: string;
-  selectedAgents?: string[];
+// Comprehensive Validation Functions
+export function validateProfile(profile: PersonalityProfile): boolean {
+  const isValid = validatePersonalityProfile(profile);
+  
+  if (!isValid) {
+    throw new SchemaValidationError(
+      validatePersonalityProfile.errors || []
+    );
+  }
+  
+  return true;
 }
 
-export interface ChatResponse {
-  replies: ChatbotResponse[];
-  sessionId: string;
+export function validateResponse(response: ChatbotResponse): boolean {
+  const isValid = validateChatbotResponse(response);
+  
+  if (!isValid) {
+    throw new SchemaValidationError(
+      validateChatbotResponse.errors || []
+    );
+  }
+  
+  return true;
 }
 
-// Error Handling Interface
-export interface ServiceError {
-  code: string;
-  message: string;
-  details?: Record<string, unknown>;
+export function validateSession(session: ConversationSession): boolean {
+  const isValid = validateConversationSession(session);
+  
+  if (!isValid) {
+    throw new SchemaValidationError(
+      validateConversationSession.errors || []
+    );
+  }
+  
+  return true;
 }
 
-// Abstract Base Classes for Consistent Component Design
-export abstract class BaseComponent {
-  abstract initialize(): Promise<void>;
-  abstract validate(): boolean;
-}
-
-// Factory for creating validated components
-export function createPersonalityProfile(data: Partial<PersonalityProfile>): PersonalityProfile {
+// Factory Functions with Validation
+export function createPersonalityProfile(
+  data: Partial<PersonalityProfile>
+): PersonalityProfile {
   const defaultProfile: PersonalityProfile = {
     id: '',
     name: '',
@@ -97,9 +115,30 @@ export function createPersonalityProfile(data: Partial<PersonalityProfile>): Per
   const profile: PersonalityProfile = { ...defaultProfile, ...data };
   
   try {
-    validatePersonalityProfile(profile);
+    validateProfile(profile);
     return profile;
   } catch (error) {
+    if (error instanceof SchemaValidationError) {
+      throw new ValidationError(
+        'Invalid Personality Profile',
+        error.details
+      );
+    }
     throw error;
   }
+}
+
+// Error Reporting Utility
+export function getValidationErrorDetails(
+  error: SchemaValidationError
+): string[] {
+  return error.details.map(
+    (err: { message?: string }) => err.message || 'Unknown validation error'
+  );
+}
+
+// Abstract Base Classes
+export abstract class BaseComponent {
+  abstract initialize(): Promise<void>;
+  abstract validate(): boolean;
 }
