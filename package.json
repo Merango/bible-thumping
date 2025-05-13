@@ -1,12 +1,13 @@
 {
   "name": "multi-agent-chat-platform",
   "version": "0.1.0",
-  "description": "Multi-agent interactive chat platform",
-  "main": "index.js",
+  "description": "Multi-Agent Chat Platform with Comprehensive Testing",
   "scripts": {
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "lint": "eslint . --ext .ts"
+    "generate-coverage": "node scripts/generate-coverage-report.js",
+    "lint": "eslint . --ext .ts",
+    "prepare-coverage": "mkdir -p coverage && npm run test && npm run generate-coverage"
   },
   "dependencies": {
     "zod": "^3.21.4"
@@ -23,7 +24,9 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "setupFiles": ["<rootDir>/tests/setup.ts"],
+    "collectCoverage": true,
+    "coverageReporters": ["json", "lcov", "text", "clover"],
+    "coverageDirectory": "coverage",
     "coverageThreshold": {
       "global": {
         "branches": 80,
