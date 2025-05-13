@@ -4,9 +4,12 @@
   "description": "Multi-agent interactive chat platform",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
     "test:watch": "jest --watch",
     "lint": "eslint . --ext .ts"
+  },
+  "dependencies": {
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@types/jest": "^29.5.3",
@@ -20,6 +23,14 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node",
-    "setupFiles": ["<rootDir>/tests/setup.ts"]
+    "setupFiles": ["<rootDir>/tests/setup.ts"],
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    }
   }
 }
