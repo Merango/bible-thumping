@@ -1,0 +1,16 @@
+{
+  "name": "multi-agent-chat-platform",
+  "version": "0.1.0",
+  "description": "Multi-agent interactive chat platform",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.3",
+    "jest": "^29.6.1",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.1.6"
+  }
+}
