@@ -1,0 +1,222 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Multi-Agent Chat Platform Component Schemas",
+  "description": "Comprehensive JSON schemas for system-wide interfaces",
+  "type": "object",
+  "definitions": {
+    "SystemError": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Unique error identifier",
+          "enum": [
+            "VALIDATION_ERROR",
+            "AUTHENTICATION_ERROR", 
+            "RESOURCE_NOT_FOUND",
+            "SYSTEM_ERROR"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "details": {
+          "type": ["object", "null"],
+          "description": "Optional additional error details"
+        }
+      }
+    },
+    "PersonalityProfile": {
+      "type": "object",
+      "required": ["id", "name", "description", "tone", "samplePrompts", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,50}$",
+          "description": "Unique identifier for the profile (lowercase, alphanumeric with hyphens)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 100,
+          "description": "Display name of the personality"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500,
+          "description": "Detailed description of the personality"
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "compassionate", 
+            "authoritative", 
+            "analytical", 
+            "empathetic", 
+            "neutral"
+          ],
+          "description": "Communication tone of the agent"
+        },
+        "samplePrompts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "description": "Sample prompts demonstrating the agent's communication style"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Version of the personality profile"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChatbotResponse": {
+      "type": "object",
+      "required": ["agentId", "message", "confidence", "timestamp"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,50}$",
+          "description": "Unique identifier of the responding agent"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "Generated response message"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confidence level of the response (0-1 scale)"
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Unix timestamp of response generation"
+        },
+        "error": {
+          "$ref": "#/definitions/SystemError"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ConversationSession": {
+      "type": "object",
+      "required": ["sessionId", "participants", "startTime", "lastActivityTime", "messages"],
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,50}$",
+          "description": "Unique identifier for the conversation session"
+        },
+        "participants": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "description": "List of participant agent IDs"
+        },
+        "startTime": {
+          "type": "number",
+          "description": "Unix timestamp of session start"
+        },
+        "lastActivityTime": {
+          "type": "number",
+          "description": "Unix timestamp of last activity in the session"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChatbotResponse"
+          },
+          "maxItems": 100,
+          "description": "List of messages in the conversation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChatRequest": {
+      "type": "object",
+      "required": ["userMessage"],
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,50}$",
+          "description": "Optional existing session identifier"
+        },
+        "userMessage": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "User's input message"
+        },
+        "selectedAgents": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 50
+          },
+          "maxItems": 5,
+          "description": "Optional specific agents to involve in the conversation"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChatResponse": {
+      "type": "object",
+      "required": ["sessionId", "replies"],
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "pattern": "^[a-z0-9-]{1,50}$",
+          "description": "Session identifier"
+        },
+        "replies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/ChatbotResponse"
+          },
+          "maxItems": 10,
+          "description": "Agent replies to the user message"
+        },
+        "error": {
+          "$ref": "#/definitions/SystemError"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "personalityProfile": {
+      "$ref": "#/definitions/PersonalityProfile"
+    },
+    "chatbotResponse": {
+      "$ref": "#/definitions/ChatbotResponse"
+    },
+    "conversationSession": {
+      "$ref": "#/definitions/ConversationSession"
+    },
+    "chatRequest": {
+      "$ref": "#/definitions/ChatRequest"
+    },
+    "chatResponse": {
+      "$ref": "#/definitions/ChatResponse"
+    }
+  }
+}
