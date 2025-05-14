@@ -1,6 +1,7 @@
-import { PersonalityProfile, ProfileValidationResult } from '../interfaces/personality.interface';
+import { PersonalityProfile, PersonalityDataManager } from '../interfaces/personality.interface';
+import { MultiAgentError, ErrorCodes } from '../interfaces/errors';
 
-describe('Personality Profile Validation', () => {
+describe('Personality Profile Management', () => {
   const validProfile: PersonalityProfile = {
     id: 'disciple_peter',
     name: 'Peter',
@@ -13,51 +14,91 @@ describe('Personality Profile Validation', () => {
     version: 1
   };
 
-  const invalidProfile: PersonalityProfile = {
-    ...validProfile,
-    name: '', // Invalid: empty name
+  const mockDataManager: PersonalityDataManager = {
+    async loadProfile(id: string) {
+      if (id === 'disciple_peter') return validProfile;
+      throw new MultiAgentError(
+        ErrorCodes.PROFILE_NOT_FOUND, 
+        'Profile not found'
+      );
+    },
+
+    validateProfile(profile: PersonalityProfile) {
+      const errors: MultiAgentError[] = [];
+      
+      if (!profile.name) {
+        errors.push(new MultiAgentError(
+          ErrorCodes.INVALID_PROFILE_SCHEMA, 
+          'Name is required'
+        ));
+      }
+
+      return {
+        isValid: errors.length === 0,
+        errors: errors.length > 0 ? errors : undefined
+      };
+    },
+
+    async saveProfile(profile: PersonalityProfile) {
+      if (profile.id === 'existing_profile') {
+        throw new MultiAgentError(
+          ErrorCodes.DUPLICATE_PROFILE_ID, 
+          'Profile already exists'
+        );
+      }
+      return profile.id;
+    },
+
+    async listProfiles() {
+      return [
+        { 
+          id: validProfile.id, 
+          name: validProfile.name, 
+          description: validProfile.description,
+          tone: validProfile.tone,
+          version: validProfile.version 
+        }
+      ];
+    }
   };
 
+  it('should successfully load an existing profile', async () => {
+    const profile = await mockDataManager.loadProfile('disciple_peter');
+    expect(profile).toEqual(validProfile);
+  });
+
+  it('should throw error for non-existent profile', async () => {
+    await expect(mockDataManager.loadProfile('non_existent'))
+      .rejects
+      .toThrow(MultiAgentError);
+  });
+
   it('should validate a complete profile', () => {
-    const mockValidator = {
-      validateProfile(profile: PersonalityProfile): ProfileValidationResult {
-        const errors: string[] = [];
-        
-        if (!profile.name) errors.push('Name is required');
-        if (!profile.description) errors.push('Description is required');
-        if (profile.samplePrompts.length === 0) errors.push('At least one sample prompt is required');
-
-        return {
-          isValid: errors.length === 0,
-          errors: errors.length > 0 ? errors : undefined
-        };
-      }
-    };
-
-    const result = mockValidator.validateProfile(validProfile);
+    const result = mockDataManager.validateProfile(validProfile);
     expect(result.isValid).toBe(true);
     expect(result.errors).toBeUndefined();
   });
 
   it('should detect invalid profile', () => {
-    const mockValidator = {
-      validateProfile(profile: PersonalityProfile): ProfileValidationResult {
-        const errors: string[] = [];
-        
-        if (!profile.name) errors.push('Name is required');
-        if (!profile.description) errors.push('Description is required');
-        if (profile.samplePrompts.length === 0) errors.push('At least one sample prompt is required');
-
-        return {
-          isValid: errors.length === 0,
-          errors: errors.length > 0 ? errors : undefined
-        };
-      }
-    };
-
-    const result = mockValidator.validateProfile(invalidProfile);
+    const invalidProfile = { ...validProfile, name: '' };
+    const result = mockDataManager.validateProfile(invalidProfile);
+    
     expect(result.isValid).toBe(false);
     expect(result.errors).toBeDefined();
-    expect(result.errors).toContain('Name is required');
+    expect(result.errors?.[0].code).toBe(ErrorCodes.INVALID_PROFILE_SCHEMA);
+  });
+
+  it('should prevent duplicate profile creation', async () => {
+    const duplicateProfile = { ...validProfile, id: 'existing_profile' };
+    
+    await expect(mockDataManager.saveProfile(duplicateProfile))
+      .rejects
+      .toThrow(MultiAgentError);
+  });
+
+  it('should list personality profiles', async () => {
+    const profiles = await mockDataManager.listProfiles();
+    expect(profiles.length).toBeGreaterThan(0);
+    expect(profiles[0].id).toBe('disciple_peter');
   });
 });
