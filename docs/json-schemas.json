@@ -1,16 +1,17 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Multi-Agent Chat Platform - Component Interface Schemas",
-  "components": {
+  "title": "Multi-Agent Chat Platform - Comprehensive Interface Schemas",
+  "definitions": {
     "PersonalityProfile": {
       "type": "object",
-      "required": ["id", "name", "description", "dialoguePrompts", "tone"],
+      "required": ["id", "name", "description", "dialoguePrompts", "tone", "version"],
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique identifier for the personality profile",
+          "description": "Unique identifier for personality profile",
           "minLength": 1,
-          "maxLength": 50
+          "maxLength": 50,
+          "pattern": "^[a-z0-9-_]+$"
         },
         "name": {
           "type": "string",
@@ -20,7 +21,7 @@
         },
         "description": {
           "type": "string",
-          "description": "Detailed description of the personality",
+          "description": "Detailed personality description",
           "minLength": 10,
           "maxLength": 500
         },
@@ -36,36 +37,53 @@
         },
         "tone": {
           "type": "string",
-          "enum": ["formal", "casual", "philosophical", "historical"]
+          "enum": [
+            "formal", 
+            "casual", 
+            "philosophical", 
+            "historical", 
+            "academic", 
+            "empathetic"
+          ]
         },
         "version": {
           "type": "string",
-          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
         }
       }
     },
     "ConversationMessage": {
       "type": "object",
-      "required": ["agentId", "message", "timestamp"],
+      "required": ["id", "senderId", "content", "timestamp", "metadata"],
       "properties": {
-        "agentId": {
+        "id": {
           "type": "string",
-          "description": "Unique identifier of the agent sending the message"
+          "description": "Unique message identifier"
         },
-        "message": {
+        "senderId": {
+          "type": "string",
+          "description": "Identifier of message sender"
+        },
+        "content": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 1000
+          "maxLength": 2000
         },
         "timestamp": {
           "type": "number",
-          "description": "Unix timestamp of message creation"
+          "description": "Unix timestamp of message"
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "language": {"type": "string"},
+            "sentiment": {"type": "string"},
+            "tokens": {"type": "number"}
+          }
         }
       }
-    }
-  },
-  "errorHandling": {
-    "standardErrorResponse": {
+    },
+    "ErrorResponse": {
       "type": "object",
       "required": ["code", "message", "details"],
       "properties": {
@@ -76,7 +94,8 @@
             "NOT_FOUND",
             "UNAUTHORIZED",
             "SYSTEM_ERROR",
-            "RATE_LIMIT_EXCEEDED"
+            "RATE_LIMIT_EXCEEDED",
+            "COMMUNICATION_ERROR"
           ]
         },
         "message": {
@@ -85,9 +104,7 @@
         },
         "details": {
           "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "items": {"type": "string"}
         }
       }
     }
