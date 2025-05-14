@@ -1,51 +1,44 @@
-/**
- * Defines the structure for a personality profile in the multi-agent chat platform
- */
+import { MultiAgentError, ErrorCodes } from './errors';
+
 export interface PersonalityProfile {
   id: string;
   name: string;
   description: string;
-  tone: string;
+  tone: 'Zealous' | 'Contemplative' | 'Compassionate' | 'Analytical';
   samplePrompts: string[];
   version: number;
 }
 
-/**
- * Validation result for a personality profile
- */
 export interface ProfileValidationResult {
   isValid: boolean;
-  errors?: string[];
+  errors?: MultiAgentError[];
 }
 
-/**
- * Interface for managing personality profiles
- */
 export interface PersonalityDataManager {
   /**
    * Load a personality profile by its unique identifier
-   * @param id - The unique identifier of the profile
-   * @returns The personality profile or null if not found
+   * @throws {MultiAgentError} PROFILE_NOT_FOUND if profile doesn't exist
    */
-  loadProfile(id: string): PersonalityProfile | null;
+  loadProfile(id: string): Promise<PersonalityProfile>;
 
   /**
    * Validate a personality profile
-   * @param profile - The profile to validate
-   * @returns Validation result
+   * @throws {MultiAgentError} INVALID_PROFILE_SCHEMA for structural issues
    */
   validateProfile(profile: PersonalityProfile): ProfileValidationResult;
 
   /**
    * Save a new or updated personality profile
-   * @param profile - The profile to save
-   * @returns The saved profile's ID
+   * @throws {MultiAgentError} DUPLICATE_PROFILE_ID if profile already exists
    */
-  saveProfile(profile: PersonalityProfile): string;
+  saveProfile(profile: PersonalityProfile): Promise<string>;
 
   /**
-   * List all available personality profiles
-   * @returns Array of profile metadata
+   * List all available personality profiles with optional filtering
    */
-  listProfiles(): Omit<PersonalityProfile, 'samplePrompts'>[];
+  listProfiles(options?: {
+    limit?: number;
+    offset?: number;
+    searchTerm?: string;
+  }): Promise<Omit<PersonalityProfile, 'samplePrompts'>[]>;
 }
