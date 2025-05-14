@@ -1,150 +1,84 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Multi-Agent Chat Platform Component Interfaces",
+  "version": "1.1.0",
   "components": {
     "PersonalityDataManager": {
       "publicMethods": {
         "loadProfile": {
-          "input": {
-            "type": "object",
-            "properties": {
-              "profileId": {"type": "string"}
-            },
-            "required": ["profileId"]
-          },
-          "output": {
-            "type": "object",
-            "properties": {
-              "id": {"type": "string"},
-              "name": {"type": "string"},
-              "tone": {"type": "string"},
-              "backstory": {"type": "string"},
-              "traits": {
-                "type": "array",
-                "items": {"type": "string"}
-              }
-            },
-            "required": ["id", "name", "tone"]
-          },
-          "errors": [
-            {"code": "PROFILE_NOT_FOUND", "message": "Profile does not exist"},
-            {"code": "INVALID_PROFILE_ID", "message": "Invalid profile identifier"}
-          ]
+          "description": "Load a complete agent personality profile",
+          "input": {"$ref": "#/definitions/ProfileLoadRequest"},
+          "output": {"$ref": "#/definitions/ProfileLoadResponse"},
+          "errors": {"$ref": "#/definitions/ProfileErrors"}
         },
         "validateProfile": {
-          "input": {
-            "type": "object",
-            "properties": {
-              "profile": {
-                "type": "object",
-                "properties": {
-                  "name": {"type": "string"},
-                  "tone": {"type": "string"},
-                  "backstory": {"type": "string"}
-                },
-                "required": ["name", "tone"]
-              }
-            },
-            "required": ["profile"]
-          },
-          "output": {
-            "type": "object",
-            "properties": {
-              "isValid": {"type": "boolean"},
-              "errors": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "field": {"type": "string"},
-                    "message": {"type": "string"}
-                  }
-                }
-              }
-            }
-          }
+          "description": "Validate a personality profile's structural integrity",
+          "input": {"$ref": "#/definitions/ProfileValidationRequest"},
+          "output": {"$ref": "#/definitions/ProfileValidationResponse"},
+          "errors": {"$ref": "#/definitions/ValidationErrors"}
+        },
+        "createProfile": {
+          "description": "Create a new personality profile",
+          "input": {"$ref": "#/definitions/ProfileCreationRequest"},
+          "output": {"type": "string", "description": "Created profile ID"},
+          "errors": {"$ref": "#/definitions/ProfileCreationErrors"}
         }
       }
     },
     "ChatbotEngineAdapter": {
       "publicMethods": {
         "generateResponse": {
-          "input": {
-            "type": "object",
-            "properties": {
-              "profileId": {"type": "string"},
-              "conversationHistory": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "speaker": {"type": "string"},
-                    "message": {"type": "string"}
-                  }
-                }
-              },
-              "currentPrompt": {"type": "string"}
-            },
-            "required": ["profileId", "conversationHistory", "currentPrompt"]
-          },
-          "output": {
-            "type": "object",
-            "properties": {
-              "response": {"type": "string"},
-              "confidence": {"type": "number", "minimum": 0, "maximum": 1},
-              "tokens": {"type": "number"},
-              "timestamp": {"type": "string", "format": "date-time"}
-            },
-            "required": ["response"]
-          },
-          "errors": [
-            {"code": "MODEL_UNAVAILABLE", "message": "Language model is currently unavailable"},
-            {"code": "RATE_LIMIT_EXCEEDED", "message": "Too many requests"},
-            {"code": "GENERATION_ERROR", "message": "Unable to generate response"}
-          ]
+          "description": "Generate a contextual response based on conversation history",
+          "input": {"$ref": "#/definitions/ResponseGenerationRequest"},
+          "output": {"$ref": "#/definitions/ResponseGenerationResponse"},
+          "errors": {"$ref": "#/definitions/ResponseGenerationErrors"}
+        },
+        "estimateTokenUsage": {
+          "description": "Predict token consumption for a given prompt",
+          "input": {"type": "string", "description": "Input text"},
+          "output": {"type": "number", "description": "Estimated token count"}
         }
       }
     },
     "ConversationOrchestrator": {
       "publicMethods": {
         "handleMessage": {
-          "input": {
-            "type": "object",
-            "properties": {
-              "sessionId": {"type": "string"},
-              "userMessage": {"type": "string"},
-              "activeAgents": {
-                "type": "array",
-                "items": {"type": "string"}
-              }
-            },
-            "required": ["sessionId", "userMessage"]
-          },
-          "output": {
-            "type": "object",
-            "properties": {
-              "replies": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "agentId": {"type": "string"},
-                    "message": {"type": "string"}
-                  }
-                }
-              },
-              "sessionStatus": {
-                "type": "string",
-                "enum": ["ACTIVE", "COMPLETED", "ERROR"]
-              }
-            }
-          },
-          "errors": [
-            {"code": "INVALID_SESSION", "message": "Session does not exist"},
-            {"code": "NO_ACTIVE_AGENTS", "message": "No agents available for conversation"}
-          ]
+          "description": "Process incoming message and generate multi-agent responses",
+          "input": {"$ref": "#/definitions/MessageHandlingRequest"},
+          "output": {"$ref": "#/definitions/MessageHandlingResponse"},
+          "errors": {"$ref": "#/definitions/MessageHandlingErrors"}
+        },
+        "createSession": {
+          "description": "Initiate a new conversation session",
+          "input": {"$ref": "#/definitions/SessionCreationRequest"},
+          "output": {"type": "string", "description": "Generated session ID"}
+        },
+        "endSession": {
+          "description": "Terminate an active conversation session",
+          "input": {"type": "string", "description": "Session ID to terminate"}
         }
       }
+    }
+  },
+  "definitions": {
+    "ProfileLoadRequest": {
+      "type": "object",
+      "properties": {
+        "profileId": {"type": "string"},
+        "includeDetailedMetadata": {"type": "boolean", "default": false}
+      },
+      "required": ["profileId"]
+    },
+    "ProfileLoadResponse": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "tone": {"type": "string"},
+        "backstory": {"type": "string"},
+        "capabilities": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "name", "tone"]
     }
   }
 }
