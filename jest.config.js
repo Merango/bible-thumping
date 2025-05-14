@@ -7,6 +7,8 @@ module.exports = {
   },
   testRegex: '(/__tests__/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  collectCoverage: true,
+  coverageReporters: ['text', 'lcov', 'json-summary'],
   coverageThreshold: {
     global: {
       branches: 80,
@@ -15,6 +17,10 @@ module.exports = {
       statements: 80
     }
   },
-  collectCoverage: true,
-  coverageReporters: ['text', 'lcov']
+  collectCoverageFrom: [
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/**/*.interface.ts',
+    '!src/**/*.test.ts'
+  ]
 };
