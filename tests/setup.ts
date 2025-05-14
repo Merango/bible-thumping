@@ -1,16 +1,38 @@
-// Enhanced Test Configuration and Utilities
+// Enhanced Test Setup and Utilities
 
+import 'jest-extended';
 import { config } from 'dotenv';
 
 // Load environment variables
 config();
 
-// Centralized test configuration with enhanced flexibility
+// Extend Jest with additional matchers
+expect.extend({
+  toBeWithinRange(received, floor, ceiling) {
+    const pass = received >= floor && received <= ceiling;
+    if (pass) {
+      return {
+        message: () => 
+          `expected ${received} not to be within range ${floor} - ${ceiling}`,
+        pass: true
+      };
+    } else {
+      return {
+        message: () => 
+          `expected ${received} to be within range ${floor} - ${ceiling}`,
+        pass: false
+      };
+    }
+  }
+});
+
+// Comprehensive test configuration
 export const TEST_CONFIG = {
+  // Global test settings
   maxTestTimeout: 10000, // 10 seconds
   testEnvironment: process.env.NODE_ENV || 'test',
   
-  // Advanced mock data generators with more realistic scenarios
+  // Advanced mock data generators
   generateMockPersonality: (overrides = {}) => ({
     id: `test-profile-${Math.random().toString(36).substr(2, 9)}`,
     name: 'Test Disciple Profile',
@@ -22,18 +44,26 @@ export const TEST_CONFIG = {
       'Discuss the role of empathy in human relationships'
     ],
     version: 1,
-    createdAt: new Date(),
+    createdAt: new Date().toISOString(),
     ...overrides
   }),
 
-  generateMockChatHistory: (length = 3, customMessages?: string[]) => 
-    customMessages || 
-    Array.from({ length }, (_, i) => `Contextual message ${i + 1}`),
+  generateMockChatResponse: (overrides = {}) => ({
+    text: 'A simulated response from the mock LLM',
+    tokens: Math.floor(Math.random() * 100),
+    backend: 'openai',
+    timestamp: Date.now(),
+    confidence: Math.random(),
+    modelVersion: '1.0.0',
+    ...overrides
+  }),
 
-  // Error simulation utilities
-  simulateNetworkError: () => {
-    throw new Error('Simulated network connectivity issue');
-  },
+  // Utility methods for test scenarios
+  createTestScenario: (name: string, description: string) => ({
+    name,
+    description,
+    timestamp: new Date().toISOString()
+  }),
 
   // Performance and load testing configuration
   performanceThresholds: {
@@ -49,5 +79,5 @@ process.on('unhandledRejection', (reason, promise) => {
   throw reason;
 });
 
-// Optional: Add global test timeout
+// Increase Jest timeout
 jest.setTimeout(TEST_CONFIG.maxTestTimeout);
