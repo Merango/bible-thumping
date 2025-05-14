@@ -1,0 +1,30 @@
+{
+  "testSuites": {
+    "unit": {
+      "enabled": true,
+      "coverage": "80%",
+      "frameworks": ["jest", "pytest"]
+    },
+    "integration": {
+      "enabled": true,
+      "coverage": "70%",
+      "frameworks": ["jest"]
+    },
+    "e2e": {
+      "enabled": true,
+      "coverage": "60%",
+      "frameworks": ["cypress"]
+    }
+  },
+  "severityLevels": {
+    "low": ["non-critical paths"],
+    "medium": ["core functionality"],
+    "high": ["critical user flows"],
+    "critical": ["security, data integrity"]
+  },
+  "testEnvironments": [
+    "development",
+    "staging",
+    "production"
+  ]
+}
