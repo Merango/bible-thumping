@@ -1,0 +1,12 @@
+{
+  "name": "multi-agent-chat-platform",
+  "version": "0.1.0",
+  "description": "Interactive multi-agent chat platform",
+  "scripts": {
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "vitest": "^0.29.2"
+  }
+}
