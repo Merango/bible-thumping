@@ -1,0 +1,95 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Multi-Agent Chat Platform - Component Interface Schemas",
+  "components": {
+    "PersonalityProfile": {
+      "type": "object",
+      "required": ["id", "name", "description", "dialoguePrompts", "tone"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the personality profile",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the personality",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the personality",
+          "minLength": 10,
+          "maxLength": 500
+        },
+        "dialoguePrompts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 250
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "tone": {
+          "type": "string",
+          "enum": ["formal", "casual", "philosophical", "historical"]
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$"
+        }
+      }
+    },
+    "ConversationMessage": {
+      "type": "object",
+      "required": ["agentId", "message", "timestamp"],
+      "properties": {
+        "agentId": {
+          "type": "string",
+          "description": "Unique identifier of the agent sending the message"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Unix timestamp of message creation"
+        }
+      }
+    }
+  },
+  "errorHandling": {
+    "standardErrorResponse": {
+      "type": "object",
+      "required": ["code", "message", "details"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "VALIDATION_ERROR",
+            "NOT_FOUND",
+            "UNAUTHORIZED",
+            "SYSTEM_ERROR",
+            "RATE_LIMIT_EXCEEDED"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable error message"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
