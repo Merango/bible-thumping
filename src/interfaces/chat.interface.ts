@@ -1,8 +1,6 @@
 import { PersonalityProfile } from './personality.interface';
+import { MultiAgentError, ErrorCodes } from './errors';
 
-/**
- * Represents a single message in a conversation
- */
 export interface ChatMessage {
   id: string;
   sender: {
@@ -13,21 +11,18 @@ export interface ChatMessage {
   timestamp: number;
 }
 
-/**
- * Interface for managing conversations and routing messages
- */
 export interface ConversationOrchestrator {
   /**
    * Start a new conversation session
-   * @returns Unique session identifier
+   * @throws {MultiAgentError} SESSION_INITIALIZATION_FAILED if session creation fails
+   * @throws {MultiAgentError} MAX_SESSIONS_EXCEEDED if session limit reached
    */
-  startSession(agents: PersonalityProfile[]): string;
+  startSession(agents: PersonalityProfile[]): Promise<string>;
 
   /**
    * Handle an incoming user message
-   * @param sessionId - Active conversation session
-   * @param message - User's message
-   * @returns Array of agent responses
+   * @throws {MultiAgentError} INVALID_SESSION_ID for non-existent sessions
+   * @throws {MultiAgentError} AGENT_UNAVAILABLE if routing fails
    */
   handleMessage(
     sessionId: string, 
@@ -35,12 +30,18 @@ export interface ConversationOrchestrator {
   ): Promise<{
     agentId: string;
     response: string;
+    confidence: number;
   }[]>;
 
   /**
    * Get conversation history for a session
-   * @param sessionId - Conversation session ID
-   * @returns Array of messages in chronological order
+   * @throws {MultiAgentError} INVALID_SESSION_ID for non-existent sessions
    */
-  getSessionHistory(sessionId: string): ChatMessage[];
+  getSessionHistory(
+    sessionId: string, 
+    options?: {
+      limit?: number;
+      offset?: number;
+    }
+  ): Promise<ChatMessage[]>;
 }
