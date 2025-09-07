@@ -1,0 +1,129 @@
+{
+    "PersonalityDataManager": {
+        "loadProfile": {
+            "input": {
+                "type": "object",
+                "properties": {
+                    "profileId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "version": {
+                        "type": ["string", "null"],
+                        "description": "Optional specific version of profile"
+                    }
+                },
+                "required": ["profileId"]
+            },
+            "output": {
+                "type": "object",
+                "properties": {
+                    "id": "string",
+                    "name": "string", 
+                    "personality": "object",
+                    "version": "string",
+                    "createdAt": "string",
+                    "updatedAt": "string"
+                },
+                "required": ["id", "name", "personality"]
+            },
+            "errors": [
+                "PROFILE_NOT_FOUND",
+                "INVALID_PROFILE_ID",
+                "PERMISSION_DENIED"
+            ]
+        },
+        "validateProfile": {
+            "input": {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "personality": {"type": "object"},
+                    "dialoguePrompts": {"type": "array"}
+                },
+                "required": ["name", "personality"]
+            },
+            "output": {
+                "type": "object",
+                "properties": {
+                    "isValid": "boolean",
+                    "errors": {"type": "array"}
+                }
+            }
+        }
+    },
+    "ChatbotEngineAdapter": {
+        "generateResponse": {
+            "input": {
+                "type": "object", 
+                "properties": {
+                    "profileId": {"type": "string"},
+                    "conversationHistory": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "speaker": {"type": "string"},
+                                "message": {"type": "string"}
+                            }
+                        }
+                    },
+                    "maxTokens": {"type": "number", "default": 150},
+                    "temperature": {"type": "number", "minimum": 0, "maximum": 1}
+                },
+                "required": ["profileId", "conversationHistory"]
+            },
+            "output": {
+                "type": "object",
+                "properties": {
+                    "response": {"type": "string"},
+                    "tokens": {"type": "number"},
+                    "responseTime": {"type": "number"}
+                }
+            },
+            "errors": [
+                "MODEL_UNAVAILABLE", 
+                "GENERATION_ERROR",
+                "RATE_LIMIT_EXCEEDED"
+            ]
+        }
+    },
+    "ConversationOrchestrator": {
+        "handleMessage": {
+            "input": {
+                "type": "object",
+                "properties": {
+                    "sessionId": {"type": "string"},
+                    "userMessage": {"type": "string"},
+                    "selectedAgents": {
+                        "type": "array", 
+                        "items": {"type": "string"}
+                    }
+                },
+                "required": ["sessionId", "userMessage"]
+            },
+            "output": {
+                "type": "object", 
+                "properties": {
+                    "agentReplies": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "agentId": {"type": "string"},
+                                "reply": {"type": "string"}
+                            }
+                        }
+                    },
+                    "sessionState": {"type": "object"}
+                }
+            },
+            "errors": [
+                "INVALID_SESSION",
+                "NO_AGENTS_AVAILABLE", 
+                "MESSAGE_PROCESSING_ERROR"
+            ]
+        }
+    }
+}
