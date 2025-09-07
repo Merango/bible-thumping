@@ -1,0 +1,42 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Personality Profile",
+    "type": "object",
+    "required": ["id", "name", "tone", "samplePrompts", "version"],
+    "properties": {
+        "id": {
+            "type": "string",
+            "description": "Unique identifier for the personality profile",
+            "minLength": 1,
+            "maxLength": 50
+        },
+        "name": {
+            "type": "string",
+            "description": "Name of the personality/character",
+            "minLength": 1,
+            "maxLength": 100
+        },
+        "tone": {
+            "type": "string",
+            "description": "Characteristic tone or communication style",
+            "enum": ["compassionate", "authoritative", "playful", "serious", "neutral"]
+        },
+        "samplePrompts": {
+            "type": "array",
+            "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+            },
+            "minItems": 1,
+            "maxItems": 10,
+            "description": "Example prompts representing the personality's communication style"
+        },
+        "version": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Version number of the profile, incremented on each update"
+        }
+    },
+    "additionalProperties": false
+}
