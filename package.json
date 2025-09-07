@@ -1,0 +1,14 @@
+{
+  "name": "multi-agent-chat-platform",
+  "version": "0.1.0",
+  "description": "Multi-agent interactive chat platform",
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "@types/jest": "^29.5.1"
+  }
+}
