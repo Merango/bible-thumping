@@ -1,0 +1,84 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Multi-Agent Chat Platform Component Interfaces",
+  "version": "1.1.0",
+  "components": {
+    "PersonalityDataManager": {
+      "publicMethods": {
+        "loadProfile": {
+          "description": "Load a complete agent personality profile",
+          "input": {"$ref": "#/definitions/ProfileLoadRequest"},
+          "output": {"$ref": "#/definitions/ProfileLoadResponse"},
+          "errors": {"$ref": "#/definitions/ProfileErrors"}
+        },
+        "validateProfile": {
+          "description": "Validate a personality profile's structural integrity",
+          "input": {"$ref": "#/definitions/ProfileValidationRequest"},
+          "output": {"$ref": "#/definitions/ProfileValidationResponse"},
+          "errors": {"$ref": "#/definitions/ValidationErrors"}
+        },
+        "createProfile": {
+          "description": "Create a new personality profile",
+          "input": {"$ref": "#/definitions/ProfileCreationRequest"},
+          "output": {"type": "string", "description": "Created profile ID"},
+          "errors": {"$ref": "#/definitions/ProfileCreationErrors"}
+        }
+      }
+    },
+    "ChatbotEngineAdapter": {
+      "publicMethods": {
+        "generateResponse": {
+          "description": "Generate a contextual response based on conversation history",
+          "input": {"$ref": "#/definitions/ResponseGenerationRequest"},
+          "output": {"$ref": "#/definitions/ResponseGenerationResponse"},
+          "errors": {"$ref": "#/definitions/ResponseGenerationErrors"}
+        },
+        "estimateTokenUsage": {
+          "description": "Predict token consumption for a given prompt",
+          "input": {"type": "string", "description": "Input text"},
+          "output": {"type": "number", "description": "Estimated token count"}
+        }
+      }
+    },
+    "ConversationOrchestrator": {
+      "publicMethods": {
+        "handleMessage": {
+          "description": "Process incoming message and generate multi-agent responses",
+          "input": {"$ref": "#/definitions/MessageHandlingRequest"},
+          "output": {"$ref": "#/definitions/MessageHandlingResponse"},
+          "errors": {"$ref": "#/definitions/MessageHandlingErrors"}
+        },
+        "createSession": {
+          "description": "Initiate a new conversation session",
+          "input": {"$ref": "#/definitions/SessionCreationRequest"},
+          "output": {"type": "string", "description": "Generated session ID"}
+        },
+        "endSession": {
+          "description": "Terminate an active conversation session",
+          "input": {"type": "string", "description": "Session ID to terminate"}
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ProfileLoadRequest": {
+      "type": "object",
+      "properties": {
+        "profileId": {"type": "string"},
+        "includeDetailedMetadata": {"type": "boolean", "default": false}
+      },
+      "required": ["profileId"]
+    },
+    "ProfileLoadResponse": {
+      "type": "object",
+      "properties": {
+        "id": {"type": "string"},
+        "name": {"type": "string"},
+        "tone": {"type": "string"},
+        "backstory": {"type": "string"},
+        "capabilities": {"type": "array", "items": {"type": "string"}}
+      },
+      "required": ["id", "name", "tone"]
+    }
+  }
+}
