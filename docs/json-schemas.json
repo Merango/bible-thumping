@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Multi-Agent Chat Platform - Comprehensive Interface Schemas",
+  "definitions": {
+    "PersonalityProfile": {
+      "type": "object",
+      "required": ["id", "name", "description", "dialoguePrompts", "tone", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for personality profile",
+          "minLength": 1,
+          "maxLength": 50,
+          "pattern": "^[a-z0-9-_]+$"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the personality",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed personality description",
+          "minLength": 10,
+          "maxLength": 500
+        },
+        "dialoguePrompts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 250
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "formal", 
+            "casual", 
+            "philosophical", 
+            "historical", 
+            "academic", 
+            "empathetic"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)$"
+        }
+      }
+    },
+    "ConversationMessage": {
+      "type": "object",
+      "required": ["id", "senderId", "content", "timestamp", "metadata"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique message identifier"
+        },
+        "senderId": {
+          "type": "string",
+          "description": "Identifier of message sender"
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Unix timestamp of message"
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "language": {"type": "string"},
+            "sentiment": {"type": "string"},
+            "tokens": {"type": "number"}
+          }
+        }
+      }
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "required": ["code", "message", "details"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "VALIDATION_ERROR",
+            "NOT_FOUND",
+            "UNAUTHORIZED",
+            "SYSTEM_ERROR",
+            "RATE_LIMIT_EXCEEDED",
+            "COMMUNICATION_ERROR"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "Human-readable error message"
+        },
+        "details": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    }
+  }
+}
