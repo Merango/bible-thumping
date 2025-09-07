@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Multi-Agent Chat Platform Component Interfaces",
+  "description": "JSON Schema for defining component interfaces and data structures",
+  "definitions": {
+    "PersonalityProfile": {
+      "type": "object",
+      "required": ["id", "name", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the personality profile",
+          "minLength": 1,
+          "maxLength": 50
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the personality",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the personality",
+          "maxLength": 500
+        },
+        "tone": {
+          "type": "string",
+          "description": "Characteristic tone of the personality",
+          "enum": ["scholarly", "compassionate", "philosophical", "analytical"]
+        },
+        "samplePrompts": {
+          "type": "array",
+          "description": "Example conversation starters",
+          "items": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 200
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "version": {
+          "type": "integer",
+          "description": "Version number of the profile",
+          "minimum": 1
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ChatResponse": {
+      "type": "object",
+      "required": ["text", "tokens", "backend", "timestamp"],
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "Generated response text",
+          "minLength": 1
+        },
+        "tokens": {
+          "type": "integer",
+          "description": "Number of tokens in the response",
+          "minimum": 0
+        },
+        "backend": {
+          "type": "string",
+          "description": "LLM backend used",
+          "enum": ["openai", "local", "anthropic"]
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Unix timestamp of response generation"
+        },
+        "confidence": {
+          "type": "number",
+          "description": "Confidence score of the response",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "modelVersion": {
+          "type": "string",
+          "description": "Version of the model used"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "personalityProfiles": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/PersonalityProfile"}
+    },
+    "chatResponses": {
+      "type": "array",
+      "items": {"$ref": "#/definitions/ChatResponse"}
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "PersonalityManager": {
+    "publicMethods": {
+      "loadProfile": {
+        "description": "Load a personality profile by its unique ID",
+        "input": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Unique identifier for the personality profile"
+            }
+          },
+          "required": ["id"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "id": {"type": "string"},
+            "name": {"type": "string"},
+            "description": {"type": "string"},
+            "tone": {"type": "string"},
+            "samplePrompts": {"type": "array", "items": {"type": "string"}},
+            "version": {"type": "number"}
+          },
+          "required": ["id", "name", "version"]
+        },
+        "errors": [
+          {"code": "PROFILE_NOT_FOUND", "message": "No profile exists with the given ID"},
+          {"code": "PROFILE_LOAD_ERROR", "message": "Error occurred while loading profile"}
+        ]
+      },
+      "validateProfile": {
+        "description": "Validate a personality profile's schema and integrity",
+        "input": {
+          "type": "object",
+          "properties": {
+            "profile": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "name": {"type": "string"},
+                "description": {"type": "string"},
+                "tone": {"type": "string"},
+                "samplePrompts": {"type": "array", "items": {"type": "string"}},
+                "version": {"type": "number"}
+              },
+              "required": ["id", "name", "version"]
+            }
+          },
+          "required": ["profile"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "isValid": {"type": "boolean"},
+            "errors": {"type": "array", "items": {"type": "string"}}
+          }
+        }
+      }
+    }
+  },
+  "ChatbotEngine": {
+    "publicMethods": {
+      "generateResponse": {
+        "description": "Generate a conversational response based on profile and conversation history",
+        "input": {
+          "type": "object",
+          "properties": {
+            "profileId": {"type": "string"},
+            "conversationHistory": {
+              "type": "array", 
+              "items": {"type": "string"}
+            },
+            "userMessage": {"type": "string"}
+          },
+          "required": ["profileId", "conversationHistory", "userMessage"]
+        },
+        "output": {
+          "type": "object",
+          "properties": {
+            "text": {"type": "string"},
+            "tokens": {"type": "number"},
+            "backend": {"enum": ["openai", "local", "anthropic"]},
+            "timestamp": {"type": "number"}
+          },
+          "required": ["text", "tokens", "backend", "timestamp"]
+        },
+        "errors": [
+          {"code": "GENERATION_ERROR", "message": "Failed to generate response"},
+          {"code": "BACKEND_UNAVAILABLE", "message": "Selected LLM backend is not available"}
+        ]
+      }
+    }
+  }
+}
