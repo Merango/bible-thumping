@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "PersonalityProfile": {
+      "type": "object",
+      "required": ["id", "name", "description", "tone", "version"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 50,
+          "pattern": "^[a-z0-9_-]+$",
+          "description": "Unique, URL-friendly identifier for the profile"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Display name of the personality"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 10,
+          "maxLength": 500,
+          "description": "Detailed description of the personality's characteristics"
+        },
+        "tone": {
+          "type": "string",
+          "enum": [
+            "Zealous", 
+            "Contemplative", 
+            "Compassionate", 
+            "Analytical", 
+            "Skeptical", 
+            "Empathetic"
+          ],
+          "description": "Emotional and communication tone of the personality"
+        },
+        "samplePrompts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 200
+          },
+          "minItems": 1,
+          "maxItems": 10,
+          "description": "Sample conversation starters or typical dialogue prompts"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Version of the personality profile for tracking changes"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Additional configurable metadata for the personality"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ChatMessage": {
+      "type": "object",
+      "required": ["id", "sender", "content", "timestamp"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$",
+          "description": "Unique identifier for the message (UUID v4)"
+        },
+        "sender": {
+          "type": "object",
+          "required": ["profileId", "name"],
+          "properties": {
+            "profileId": {
+              "type": "string",
+              "description": "Reference to the sender's personality profile"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 100,
+              "description": "Display name of the message sender"
+            }
+          },
+          "additionalProperties": false
+        },
+        "content": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "Actual text content of the message"
+        },
+        "timestamp": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Unix timestamp of message creation"
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Confidence score of the message generation"
+            },
+            "context": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Contextual tags or references"
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
